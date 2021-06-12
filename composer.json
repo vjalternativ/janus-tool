@@ -1,0 +1,14 @@
+{
+	"name" : "vizzy-php/janus-tool",
+	"description" : "Janus Admin API and Utility",
+	"type" : "library",
+	"license" : "MIT",
+	"require" : {
+		"php-curl-class/php-curl-class" : "~9.1"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"vizzy\\php\\lib\\janus\\" : "src"
+		}
+	}
+}
