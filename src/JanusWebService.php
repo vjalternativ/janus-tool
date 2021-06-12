@@ -8,11 +8,13 @@ class JanusWebService
 
     private $curl;
 
-    private $apiEndpoint;
-
     private $sessionId;
 
     private $pluginVsHandlerId = array();
+
+    private $apiDomain;
+
+    private $apiSecret;
 
     private function __construct()
     {
@@ -25,6 +27,21 @@ class JanusWebService
             self::$instance = new JanusWebService();
         }
         return self::$instance;
+    }
+
+    public function init($vmsConfigArray = array())
+    {
+        if (isset($vmsConfigArray['api']['domain'])) {
+            $this->apiDomain = $vmsConfigArray['api']['domain'];
+        } else {
+            throw new Exception("api domain not specified");
+        }
+
+        if (isset($vmsConfigArray['api']['secret'])) {
+            $this->apiSecret = $vmsConfigArray['api']['secret'];
+        } else {
+            throw new Exception("api secret not specified");
+        }
     }
 
     function getTransactionId()
@@ -40,13 +57,13 @@ class JanusWebService
         $json = array();
         $json['janus'] = "message";
         $json['transaction'] = $this->getTransactionId();
-        $json['apisecret'] = "janusrocks";
+        $json['apisecret'] = $this->apiSecret;
         $json['plugin'] = $plugin;
         $json["body"] = $data;
 
         ;
 
-        $result = $curl->post("http://localhost:8088/janus/" . $this->getSessionId() . "/" . $handleId, json_encode($json));
+        $result = $curl->post($this->apiDomain . "/janus/" . $this->getSessionId() . "/" . $handleId, json_encode($json));
 
         $curl->close();
         if (isset($result['janus']) && $result['janus'] == "success") {} else {
@@ -63,10 +80,10 @@ class JanusWebService
         $json = array();
         $json['janus'] = "attach";
         $json['transaction'] = $this->getTransactionId();
-        $json['apisecret'] = "janusrocks";
+        $json['apisecret'] = $this->apiSecret;
         $json['plugin'] = $plugin;
 
-        $result = $curl->post("http://localhost:8088/janus/" . $this->getSessionId(), json_encode($json));
+        $result = $curl->post($this->apiDomain . "/janus/" . $this->getSessionId(), json_encode($json));
         $curl->close();
         if (isset($result['data']) && $result['janus'] == "success") {
             $this->pluginVsHandlerId[$plugin] = $result['data']['id'];
@@ -100,9 +117,9 @@ class JanusWebService
         $json = array();
         $json['janus'] = "create";
         $json['transaction'] = $this->getTransactionId();
-        $json['apisecret'] = "janusrocks";
+        $json['apisecret'] = $this->apiSecret;
 
-        $result = $curl->post("http://localhost:8088/janus", json_encode($json));
+        $result = $curl->post($this->apiDomain . "/janus", json_encode($json));
         $curl->close();
         if (isset($result['data']) && $result['janus'] == "success") {
             $this->setSessionId($result['data']['id']);
