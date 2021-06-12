@@ -1,5 +1,8 @@
 <?php
+namespace vizzy\php\lib\janus;
+
 use Curl\Curl;
+use Exception;
 
 class JanusWebService
 {
